@@ -29,8 +29,7 @@
       (let* ((type (PQftype res-ptr i)))
         (push
          (case type
-           ((#.pgsql-ftype#bytea
-             #.pgsql-ftype#int2
+           ((#.pgsql-ftype#int2
              #.pgsql-ftype#int4)
             :int32)
            (#.pgsql-ftype#int8

@@ -45,8 +45,7 @@
   "Extracts canonical field type from fields list"
   (let ((oid (cadr (nth index fields))))
     (case oid
-      ((#.pgsql-ftype#bytea
-        #.pgsql-ftype#int2
+      ((#.pgsql-ftype#int2
         #.pgsql-ftype#int4)
        :int32)
       (#.pgsql-ftype#int8

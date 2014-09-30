@@ -288,7 +288,9 @@ computed for each field."
   (typecase query-expression
     (sql-object-query
      (map output-type-spec #'(lambda (x) (apply function x))
-          (query query-expression)))
+          (query query-expression
+                 :result-types result-types
+                 :database database)))
     (t
      ;; Functional query
      (macrolet ((type-specifier-atom (type)

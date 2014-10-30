@@ -80,7 +80,7 @@
   (setf (easy-slot-value object slotdef)
         (slot-value slotdef 'void-value)))
 
-(defmethod update-slot-from-db-value ((instance standard-db-object) slotdef value)
+(defmethod update-slot-from-db-value ((instance standard-db-object) slotdef value database)
   "This gets a value from the database and turns it itno a lisp value
    based on the slot's slot-db-reader or baring that read-sql-value"
   (declare (optimize (speed 3) #+cmu (extensions:inhibit-warnings 3)))
@@ -91,9 +91,9 @@
       ((null slot-reader)
        (setf (easy-slot-value instance slotdef)
              (read-sql-value value (delistify slot-type)
-                             (choose-database-for-instance instance)
+                             database
                              (database-underlying-type
-                              (choose-database-for-instance instance)))))
+                              database))))
       (t (etypecase slot-reader
            ((or symbol function)
             (setf (easy-slot-value instance slotdef)
@@ -145,9 +145,10 @@
 (defmethod get-slot-values-from-view (obj slotdeflist values)
   "Used to copy values from the database into the object
    used by things like find-all and select"
-  (loop for slot in slotdeflist
-        for value in values
-        do (update-slot-from-db-value obj slot value))
+  (let ((database (choose-database-for-instance obj)))
+    (loop for slot in slotdeflist
+          for value in values
+          do (update-slot-from-db-value obj slot value database)))
   obj)
 
 (defclass class-and-slots ()
@@ -231,7 +232,8 @@
                     (or new-pk-value
                         (setf new-pk-value
                               (database-last-auto-increment-id
-                               database table slot))))))
+                               database table slot)))
+                    database)))
              ;; NB: This interacts very strangely with autoincrement keys
              ;; (see changelog 2014-01-30)
              (chain-primary-keys (in-class)
@@ -454,7 +456,7 @@
       (get-slot-value-from-record instance slot :database database)
     (let ((vd (choose-database-for-instance instance database)))
       (setf (slot-value instance 'view-database) vd)
-      (update-slot-from-db-value instance slot-def res))))
+      (update-slot-from-db-value instance slot-def res vd))))
 
 
 (defvar +no-slot-value+ '+no-slot-value+)
@@ -1092,7 +1094,7 @@
     for object = (or existing
                      (make-instance class :view-database database))
     do (loop for slot in (slot-list select-list)
-             do (update-slot-from-db-value object slot (pop row)))
+             do (update-slot-from-db-value object slot (pop row) database))
     do (loop for join-slot in (join-slots select-list)
              for join in (joins select-list)
              for join-class = (view-class join)
@@ -1100,7 +1102,7 @@
                 (setf (easy-slot-value object join-slot)
                       (make-instance join-class))
              do (loop for slot in (slot-list join)
-                      do (update-slot-from-db-value join-object slot (pop row))))
+                      do (update-slot-from-db-value join-object slot (pop row) database)))
     do (when existing (instance-refreshed object))
         collect object))
 

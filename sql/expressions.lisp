@@ -508,7 +508,9 @@
        (write-string (escaped-database-identifier name) *sql-stream*))
       (t (output-sql name database)))
     (let ((*in-subselect* nil)) ;; aboid double parens
-      (when args (output-sql args database))))
+      (if args
+          (output-sql args database)
+          (write-string "()" *sql-stream*))))
   t)
 
 
@@ -679,8 +681,6 @@ uninclusive, and the args from that keyword to the end."
               arglist
             (if (null selections)
                 (error "No target columns supplied to select statement."))
-            (if (null from)
-                (error "No source tables supplied to select statement."))
             (make-instance 'sql-query :selections selections
                            :all all :flatp flatp :set-operation set-operation
                            :distinct distinct :from from :where where

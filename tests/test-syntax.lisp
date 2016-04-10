@@ -348,6 +348,10 @@
  "SELECT FOO FROM BAR MINUS SELECT BAZ FROM BAR")
 
 
+(deftest :syntax/function/0
+    (clsql:sql [function "RANDOM"])
+  "RANDOM()")
+
 (deftest :syntax/function/1
     (clsql:sql [function "COS" [age]])
   "COS(AGE)")

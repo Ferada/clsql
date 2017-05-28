@@ -463,10 +463,11 @@ removed. keys are searched with #'MEMBER"
     ;;clearing mechanism. If you are on an implementation that doesn't support
     ;;weak hash tables then you're memory may accumulate.
 
-    #-(or sbcl allegro clisp lispworks ccl)
+    #-(or sbcl allegro clisp lispworks ccl abcl)
     (warn "UNSAFE! use of weak hash on implementation without support. (see clsql/sql/utils.lisp to add)")
 
     (make-hash-table
+      #+abcl :weakness #+abcl :value
       #+allegro   :values    #+allegro :weak
       #+clisp     :weak      #+clisp :value
       #+lispworks :weak-kind #+lispworks :value

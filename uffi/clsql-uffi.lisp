@@ -160,8 +160,13 @@
        ;; NB: this used to manually expand the arg list based on if length and encoding
        ;; were provided.  If this is required the macro is aweful and should be rewritten
        ;; to accept nil args (as it appears to)
-       (uffi:convert-from-foreign-string
-        char-ptr
-        :null-terminated-p (null length)
-        :length length
-        :encoding encoding)))))
+       (if length
+           (uffi:convert-from-foreign-string
+            char-ptr
+            :null-terminated-p NIL
+            :length length
+            :encoding encoding)
+           (uffi:convert-from-foreign-string
+            char-ptr
+            :null-terminated-p T
+            :encoding encoding))))))

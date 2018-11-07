@@ -373,7 +373,7 @@
 (defmethod database-prepare (sql-stmt types (database generic-postgresql-database) result-types field-names)
   (let ((id (next-prepared-id)))
     (database-execute-command
-     (format nil "PREPARE ~A (~{~A~^,~}) AS ~A"
+     (format nil "PREPARE ~A ~@[(~{~A~^,~})~] AS ~A"
              id
              (mapcar #'clsql-type->postgresql-type types)
              (prepared-sql-to-postgresql-sql sql-stmt))
@@ -397,7 +397,7 @@
 
 (defmethod database-run-prepared ((stmt postgresql-stmt))
   (with-slots (database id bindings field-names result-types) stmt
-    (let ((query (format nil "EXECUTE ~A (~{~A~^,~})"
+    (let ((query (format nil "EXECUTE ~A ~@[(~{~A~^,~})~]"
                          id (mapcar #'binding-to-param bindings))))
       (cond
        ((and field-names (not (consp field-names)))

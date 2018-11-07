@@ -12,6 +12,25 @@
 
 (in-package #:clsql-sys)
 
+(defun error-converting-value (val type &optional (database *default-database*))
+  (restart-case
+      (error (make-condition
+              'sql-value-conversion-error
+              :expected-type type :value val :database database))
+    (continue ()
+      :report "Continue using the unconverted value"
+      (values val t))
+    (use-value (new-val)
+      :report "Use a different value instead of this failed conversion"
+      (values new-val t))))
+
+(defun maybe-error-converting-value
+    (new val type &optional (database *default-database*))
+  (if (typep new type)
+      new
+      (error-converting-value
+       val type database)))
+
 (defun find-normalized-key (obj)
   "Find the first / primary key of a normalized object"
   (find-slot-if obj #'key-slot-p T T))
@@ -633,6 +652,7 @@
 (defmethod read-sql-value (val type database db-type)
   "read a sql value, from :around read-eval is disabled read numbers in base 10"
   ;; errors, nulls and preconverted types are already handled in around
+  (declare (ignore db-type))
   (typecase type
     (symbol
      (case type
@@ -1020,6 +1040,7 @@
 (defmethod filter-select-list ((c clsql-sys::standard-db-object)
                                (sl clsql-sys::select-list)
                                database)
+  (declare (ignore database))
   sl)
 
 (defun make-select-list (class-and-slots &key (do-joins-p nil)

@@ -148,23 +148,3 @@ connection is no longer usable."))
   ((expected-type :accessor expected-type :initarg :expected-type :initform nil)
    (value :accessor value :initarg :value :initform nil)
    (database :accessor database :initarg :database :initform nil)))
-
-(defun error-converting-value (val type &optional (database *default-database*))
-  (restart-case 
-      (error (make-condition
-              'sql-value-conversion-error
-              :expected-type type :value val :database database))
-    (continue ()
-      :report "Continue using the unconverted value"
-      (values val t))
-    (use-value (new-val)
-      :report "Use a different value instead of this failed conversion"
-      (values new-val t)
-      )))
-
-(defun maybe-error-converting-value
-    (new val type &optional (database *default-database*))
-  (if (typep new type)
-      new
-      (error-converting-value
-       val type database)))

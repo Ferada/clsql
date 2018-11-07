@@ -55,6 +55,7 @@
      ;; check for an inexact match if we had symbols in the mix
      (string-equal (cast i1) (cast i2)))))
 
+(declaim (inline delistify-dsd))
 (defun delistify-dsd (list)
   "Some MOPs, like openmcl 0.14.2, cons attribute values in a list."
   (if (and (listp list) (null (cdr list)))
@@ -227,6 +228,7 @@
     `(make-instance 'sql-ident :name ',name)))
 
 (defmethod output-sql ((expr %database-identifier) database)
+  (declare (ignore database))
   (write-string (escaped expr) *sql-stream*))
 
 (defmethod output-sql ((expr sql-ident) database)
@@ -248,6 +250,14 @@
 (defmethod collect-table-refs (sql)
   (declare (ignore sql))
   nil)
+
+;; Here's a real warhorse of a function!
+
+(declaim (inline listify))
+(defun listify (x)
+  (if (listp x)
+      x
+      (list x)))
 
 (defmethod collect-table-refs ((sql list))
   (loop for i in sql
@@ -908,14 +918,6 @@ uninclusive, and the args from that keyword to the end."
     :initform nil))
   (:documentation
    "An SQL CREATE TABLE statement."))
-
-;; Here's a real warhorse of a function!
-
-(declaim (inline listify))
-(defun listify (x)
-  (if (listp x)
-      x
-      (list x)))
 
 (defmethod output-sql ((stmt sql-create-table) database)
   (flet ((output-column (column-spec)

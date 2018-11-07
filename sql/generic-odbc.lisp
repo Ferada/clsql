@@ -50,7 +50,7 @@
 (defmethod database-get-type-specifier ((type symbol) args database
                                         (db-type (eql :mssql)))
   "Special database types for MSSQL backends"
-  (declare (ignore database db-type args))
+  (declare (ignore database db-type))
   (case type
     (wall-time "DATETIME")
     (date "SMALLDATETIME")
@@ -180,7 +180,7 @@ database-list-views"
     ;; http://msdn.microsoft.com/en-us/library/ms711831%28VS.85%29.aspx
     ;; TABLE_SCHEM is hard-coded in second column by ODBC Driver Manager
     ;; TABLE_NAME in third column, TABLE_TYPE in fourth column
-    (loop for (category schema name ttype . rest) in rows
+    (loop for (nil schema name ttype) in rows
 	  when (and (string-equal type ttype)
 		    (or (null owner) (string-equal owner schema))
 		    ;; unless requesting by name, skip system schema
@@ -250,6 +250,7 @@ on schema since that's what tends to be exposed. Some DBs like mssql
 
 (defmethod database-last-auto-increment-id
     ((database generic-odbc-database) table column)
+  (declare (ignore table column))
   (case (database-underlying-type database)
     (:mssql
      (first (clsql:query "SELECT SCOPE_IDENTITY()"

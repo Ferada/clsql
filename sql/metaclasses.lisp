@@ -421,7 +421,6 @@ implementations."
       (car list)
       list))
 
-(declaim (inline delistify-dsd))
 ;; there is an :after method below too
 (defmethod initialize-instance :around
     ((obj view-class-direct-slot-definition)

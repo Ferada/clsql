@@ -26,7 +26,7 @@
   ((expression :accessor expression :initarg :expression :initform nil
                :documentation "query that refers to parameters using \"$1\", \"$2\", \"$n\".
        These match positions in the parameters list.")
-   (parameters :accessor parameters :initarg :parameters :initform nil
+   (parameters :reader parameters :initarg :parameters :initform nil
                :documentation "list of parameters")
    (prepared-name :accessor prepared-name :initarg :prepared-name :initform ""
     :documentation "If we want this to be a prepared statement, give it a name
